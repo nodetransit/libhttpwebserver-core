@@ -77,7 +77,7 @@ endif ()
 
 #---------------------------------------------------------------------
 
-file (GLOB SOURCE_FILES "*.cpp")
+file (GLOB_RECURSE SOURCE_FILES "." "*.cpp")
 
 if (VERBOSE)
     message(STATUS "${CMAKE_PROJECT_NAME} files:")

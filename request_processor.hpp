@@ -4,12 +4,18 @@
 #include <sstream>
 #include <unordered_map>
 #include <vector>
+#include <stdexcept>
+#include <cstdio>
 
 #include <event.h>
 #include <evhttp.h>
+#include <dlib/logger.h>
+#include <dlib/misc_api.h>
 
 #include "interfaces/guest.hpp"
 #include "internal_request.hpp"
+#include "macros/finally.hpp"
+#include "utility/string.hpp"
 
 namespace fb::http {
 
@@ -33,7 +39,7 @@ private:
 
 public:
     RequestProcessor();
-    ~RequestProcessor();
+    ~RequestProcessor() = default;
 
     void visit(InternalRequest* host);
 

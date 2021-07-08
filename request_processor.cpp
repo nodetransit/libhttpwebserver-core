@@ -7,25 +7,25 @@ RequestProcessor::RequestProcessor() :
 {
 }
 
-RequestProcessor::~RequestProcessor()
-{
-}
-
 void
-RequestProcessor::parse(evhttp_request*)
+RequestProcessor::parse(evhttp_request* http_request)
 {
-    if(this->request == nullptr) {
-        return;
+    if (http_request == nullptr) {
+        throw std::logic_error("");
     }
 
+    this->request = http_request;
+
+    this->parse_method();
     this->parse_headers();
+    this->parse_post_data();
 }
 
 void
 RequestProcessor::parse_method()
 {
-    if(this->request == nullptr) {
-        return;
+    if (this->request == nullptr) {
+        throw std::logic_error("");
     }
 
     evhttp_cmd_type type = evhttp_request_get_command(this->request);
@@ -88,8 +88,8 @@ RequestProcessor::parse_method()
 void
 RequestProcessor::parse_headers()
 {
-    if(this->request == nullptr) {
-        return;
+    if (this->request == nullptr) {
+        throw std::logic_error("");
     }
 
     evkeyvalq* req_headers = evhttp_request_get_input_headers(this->request);
@@ -101,19 +101,148 @@ RequestProcessor::parse_headers()
 
     evkeyval* cur = req_headers->tqh_first;
 
-    std::unordered_map <std::string, std::string> headers = {};
+    std::unordered_map<std::string, std::string> header_map = {};
 
     do {
         char* key = cur->key;
         char* val = cur->value;
 
-        headers.insert({key, val});
+        header_map.emplace(key, val);
 
         cur = cur->next.tqe_next;
 
     } while (cur != nullptr);
 
-    this->headers = headers;
+    this->headers = header_map;
+}
+
+inline namespace {
+std::unordered_map<std::string, std::string>
+parse_url_encoded_form(const std::string& post_data, const std::string& content_type)
+{
+    std::unordered_map<std::string, std::string> map = {};
+
+    using namespace nt::utility::string;
+
+    for (auto& item : split(post_data, "&")) {
+        int         index = item.find('=', 0);
+        std::string key   = html_decode(item.substr(0, index));
+        std::string value = html_decode(item.substr(index + 1, -1));
+
+        map.emplace(key, value);
+    }
+
+    return map;
+}
+
+std::string
+parse_multipart_boundary(const std::string& content_type)
+{
+    std::stringstream ss(content_type);
+    std::string       item;
+    std::string       boundary;
+
+    while (std::getline(ss, item, ';')) {
+        using namespace nt::utility::string;
+
+        int index = item.find('=', 0);
+
+        std::string key = tolower(trim(item.substr(0, index)));
+
+        std::string value = index < 0 ?
+                            "" :
+                            trim(item.substr(index + 1, -1));
+
+        if (key == "boundary") {
+            if (value.empty()) {
+                throw std::logic_error("");
+            }
+
+            if (value[0] == '"' || value[0] == '\'') {
+                boundary = value.substr(1, value.length() - 2);
+            } else {
+                boundary = value;
+            }
+
+
+            break;
+        }
+    }
+
+    if (boundary.empty()) {
+        throw std::logic_error("");
+    }
+
+    return boundary;
+}
+
+std::pair<std::string, std::string>
+parse_multipart_form_data(std::string& part_data)
+{
+    using nt::utility::string::getline;
+    using nt::utility::string::ltrim;
+
+    const std::string crlf = "\r\n";
+
+    std::string header = getline(part_data, crlf);
+    getline(part_data, crlf);
+
+    if (part_data.length() >= 2) {
+        part_data.erase(part_data.length() - 2, 2);
+    }
+
+    std::string body = part_data;
+
+    std::string key   = header;
+    std::string value = body;
+
+    return {key, value};
+}
+
+/**
+ * @brief
+ * @param post_data
+ * @param content_type
+ * @see https://datatracker.ietf.org/doc/html/rfc2046#section-5.1.1
+ * @return
+ */
+std::unordered_map<std::string, std::string>
+parse_multipart_form(std::string post_data, const std::string& content_type)
+{
+    std::unordered_map<std::string, std::string> post_map = {};
+
+    std::string boundary = "--" + parse_multipart_boundary(content_type);
+
+    do {
+        using nt::utility::string::getline;
+        using nt::utility::string::ltrim;
+
+        std::string part_data = ltrim(getline(post_data, boundary));
+
+        if (!part_data.empty()) {
+            post_map.insert(parse_multipart_form_data(part_data));
+        }
+
+    } while (!post_data.empty() && post_data != "--\r\n");
+
+    return post_map;
+}
+
+std::unordered_map<std::string, std::string>
+parse_multipart_mixed_body(const std::string& post_data, const std::string& content_type)
+{
+    return {};
+}
+
+std::unordered_map<std::string, std::string>
+parse_plain_text_body(const std::string& post_data, const std::string& content_type)
+{
+    std::unordered_map<std::string, std::string> map = {
+          {"body", post_data},
+    };
+
+    return map;
+}
 }
 
 void
@@ -121,47 +250,55 @@ RequestProcessor::parse_post_data()
 {
     this->post_data = {};
 
-    if(this->request == nullptr) {
+    if (this->request == nullptr) {
         return;
     }
 
-    if (this->method != "POST" || this->method != "PUT" || this->method != "PATCH") {
+    if (this->method != "POST" && this->method != "PUT" && this->method != "PATCH") {
         return;
     }
 
-    if (this->headers.find("Content-Type") != this->headers.end()) {
-        std::string post_data = (char*)evbuffer_pullup(this->request->input_buffer, -1);
+    if (this->headers.find("content-type") != this->headers.end()) {
+        size_t      buffer_len    = evbuffer_get_length(this->request->input_buffer);
+        std::string raw_post_data = std::string((char*)evbuffer_pullup(this->request->input_buffer, -1), buffer_len);
+        std::string content_type  = this->headers["content-type"];
 
-        if (this->headers["Content-Type"] == "application/x-www-form-urlencoded") {
-            std::stringstream ss(post_data);
-            std::string       item;
-
-            std::unordered_map <std::string, std::string> map = {};
-
-            while (std::getline(ss, item, '&')) {
-                int         index = item.find('=', 0);
-                std::string key   = evhttp_decode_uri(item.substr(0, index).c_str());
-                std::string value = evhttp_decode_uri(item.substr(index + 1, -1).c_str());
-
-                map.insert({key, value});
-            }
-
-            this->post_data = map;
-
-        } else if (this->headers["Content-Type"] == "multipart/form-data") {
-            this->post_data = {};
-
+        if (content_type.find("application/x-www-form-urlencoded") != std::string::npos) {
+            this->post_data = parse_url_encoded_form(raw_post_data, content_type);
+        } else if (content_type.find("multipart/form-data") != std::string::npos) {
+            this->post_data = parse_multipart_form(raw_post_data, content_type);
+        } else if (content_type.find("text/plain") != std::string::npos) {
+            this->post_data = parse_plain_text_body(raw_post_data, content_type);
+        } else {
+            throw std::logic_error("");
         }
     }
 }
 
 void
-RequestProcessor::visit(InternalRequest* host)
+RequestProcessor::visit(InternalRequest* internal_request)
 {
-    if(host->request == nullptr) {
+    auto file = fopen("", "r");
+
+    ______________________________________________________________
+
+              if (file != nullptr) {
+                  fclose(file);
+              }
+
+    _____________________________________________________________;
+
+    try {
+        this->parse(internal_request->request);
+
+        internal_request->method    = std::move(method);
+        internal_request->headers   = std::move(headers);
+        internal_request->post_data = std::move(post_data);
+
         return;
+    } catch (const std::exception& ex) {
+        internal_request->error = ex.what();
     }
 
-    this->parse(host->request);
 }
 

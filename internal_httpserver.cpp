@@ -65,9 +65,9 @@ InternalHttpServer::handle(void* r, void* dispatcher)
 
     InternalHttpServer* server = (InternalHttpServer*)dispatcher;
 
-    _try {
+    try {
         server->process(request);
-    } _catch (...) {
+    } catch (...) {
         evhttp_clear_headers(evhttp_request_get_output_headers(request));
         evhttp_send_error(request,
                           status::code_internal_server_error,
@@ -126,19 +126,32 @@ InternalHttpServer::process(void* r)
 
     evbuffer_add_printf(buf, "<pre>");
 
-    auto headers = this->parse_headers(r);
-
-    for (auto& hd: headers) {
+    for (auto& hd: ir.headers) {
         evbuffer_add_printf(buf, "\t%s\t\t: %s\n", hd.first.c_str(), hd.second.c_str());
     }
 
     evbuffer_add_printf(buf, "</pre>");
 
-    std::string form = "<form action='/upload' method='POST' enctype='multipart/form-data' >"
+    evbuffer_add_printf(buf, "<h1>ポスト</h1>");
+    evbuffer_add_printf(buf, "<pre>");
+
+    for (auto& pd: ir.post_data) {
+        evbuffer_add_printf(buf, "\t%s\t\t: %s\n", pd.first.c_str(), pd.second.c_str());
+    }
+
+    evbuffer_add_printf(buf, "</pre>");
+
+    std::string form = "<form action='/upload' method='POST'>"
+                       "<input type='text' name='user' />"
+                       "<input type='password' name='secret' />"
+                       "<textarea name='message'></textarea>"
+                       "<input name='fsubmit' type='submit' value='send' />"
+                       "</form>"
+                       "<form action='/upload' method='POST' enctype='multipart/form-data' >"
                        "<input type='text' name='user' />"
                        "<input type='password' name='secret' />"
                        "<input type='file' name='key' />"
-                       "<input type='submit' value='send' />"
+                       "<input name='mp_submit' type='submit' value='send' />"
                        "</form>";
     evbuffer_add_printf(buf, form.c_str());
 
@@ -165,142 +178,4 @@ InternalHttpServer::parse_request(void* r)
     return request;
 }
 
-std::string
-InternalHttpServer::get_request_type(void* r)
-{
-    struct evhttp_request* request = (evhttp_request*)r;
 
-    if (request == nullptr) {
-        throw std::runtime_error("invalid method");
-    }
-
-    evhttp_cmd_type type = evhttp_request_get_command(request);
-
-    switch (type) {
-    case EVHTTP_REQ_GET     :
-        return "GET";
-    case EVHTTP_REQ_POST    :
-        return "POST";
-    case EVHTTP_REQ_HEAD    :
-        return "HEAD";
-    case EVHTTP_REQ_PUT     :
-        return "PUT";
-    case EVHTTP_REQ_DELETE  :
-        return "DELETE";
-    case EVHTTP_REQ_OPTIONS :
-        return "OPTIONS";
-    case EVHTTP_REQ_TRACE   :
-        return "TRACE";
-    case EVHTTP_REQ_CONNECT :
-        return "CONNECT";
-    case EVHTTP_REQ_PATCH   :
-        return "PATCH";
-        // case EVHTTP_REQ_PROPFIND:
-        //     return "PROPFIND";
-        // case EVHTTP_REQ_PROPPATCH:
-        //     return "PROPPATCH";
-        // case EVHTTP_REQ_MKCOL   :
-        //     return "MKCOL";
-        // case EVHTTP_REQ_LOCK    :
-        //     return "LOCK";
-        // case EVHTTP_REQ_UNLOCK  :
-        //     return "UNLOCK";
-        // case EVHTTP_REQ_COPY    :
-        //     return "COPY";
-        // case EVHTTP_REQ_MOVE    :
-        //     return "MOVE";
-    default:
-        // return "NULL";
-        throw std::runtime_error("invalid method");
-    }
-}
-
-std::unordered_map <std::string, std::string>
-InternalHttpServer::parse_headers(void* r)
-{
-    struct evhttp_request* request = (evhttp_request*)r;
-
-    if (request == nullptr) {
-        return {};
-    }
-
-    evkeyvalq* req_headers = evhttp_request_get_input_headers(request);
-
-    if (req_headers == nullptr) {
-        return {};
-    }
-
-    evkeyval* cur = req_headers->tqh_first;
-
-    std::unordered_map <std::string, std::string> headers = {};
-
-    do {
-        char* key = cur->key;
-        char* val = cur->value;
-
-        headers.insert({key, val});
-
-        cur = cur->next.tqe_next;
-
-    } while (cur != nullptr);
-
-    return headers;
-}
-
-std::unordered_map <std::string, std::string>
-InternalHttpServer::parse_post_data(void* r, std::unordered_map <std::string, std::string> headers)
-{
-    struct evhttp_request* request = (evhttp_request*)r;
-
-    if (request == nullptr) {
-        return {};
-    }
-
-    std::string request_type = InternalHttpServer::get_request_type(r);
-
-    if (request_type != "POST" || request_type != "PUT") {
-        return {};
-    }
-
-    if (headers.find("Content-Type") != headers.end()) {
-        std::string post_data = (char*)evbuffer_pullup(request->input_buffer, -1);
-
-        if (headers["Content-Type"] == "application/x-www-form-urlencoded") {
-            std::stringstream ss(post_data);
-            std::string       item;
-
-            std::unordered_map <std::string, std::string> map = {};
-
-            while (std::getline(ss, item, '&')) {
-                int         index = item.find('=', 0);
-                std::string key   = evhttp_decode_uri(item.substr(0, index).c_str());
-                std::string value = evhttp_decode_uri(item.substr(index + 1, -1).c_str());
-
-                map.insert({key, value});
-            }
-
-            return map;
-
-        } else if (headers["Content-Type"] == "multipart/form-data") {
-            std::string post_data = (char*)evbuffer_pullup(request->input_buffer, -1);
-
-        }
-    }
-
-    std::string post_data = (char*)evbuffer_pullup(request->input_buffer, -1);
-
-    std::stringstream ss(post_data);
-    std::string       item;
-
-    std::unordered_map <std::string, std::string> map = {};
-
-    while (std::getline(ss, item, '&')) {
-        int         index = item.find('=', 0);
-        std::string key   = evhttp_decode_uri(item.substr(0, index).c_str());
-        std::string value = evhttp_decode_uri(item.substr(index + 1, -1).c_str());
-
-        map.insert({key, value});
-    }
-
-    return map;
-}
