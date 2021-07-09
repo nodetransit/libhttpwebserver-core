@@ -2,6 +2,12 @@
 
 using namespace nt::http;
 
+InternalRequest::InternalRequest() :
+      request(nullptr),
+      error("")
+{
+}
+
 InternalRequest::InternalRequest(evhttp_request* request) :
       request(request),
       error("")

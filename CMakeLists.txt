@@ -143,14 +143,10 @@ if (NOT DEBUG)
     endif ()
 endif ()
 
-target_compile_options (${BINARY_NAME} PRIVATE ${COMMON_COMPILE_OPTIONS}
-                                               ${COMMON_DEBUG_COMPILE_OPTTIONS})
-set_property (TARGET ${BINARY_NAME} PROPERTY CXX_STANDARD 14)
-
 #---------------------------------------------------------------------
 
 if (${HTTPWEBSERVER_LIB_TYPE} STREQUAL "STATIC")
-    list (APPEND COMMON_DEBUG_COMPILE_OPTTIONS "-fPIC"
+    list (APPEND COMMON_COMPILE_OPTIONS "-fPIC"
           )
 elseif (${HTTPWEBSERVER_LIB_TYPE} STREQUAL "SHARED")
     if (LOSER)
@@ -190,6 +186,10 @@ elseif (${HTTPWEBSERVER_LIB_TYPE} STREQUAL "SHARED")
     set_target_properties(${BINARY_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
     set_target_properties(${BINARY_NAME} PROPERTIES SOVERSION 0)
 endif ()
+
+target_compile_options (${BINARY_NAME} PRIVATE ${COMMON_COMPILE_OPTIONS}
+                        ${COMMON_DEBUG_COMPILE_OPTTIONS})
+set_property (TARGET ${BINARY_NAME} PROPERTY CXX_STANDARD 14)
 
 target_link_libraries (${BINARY_NAME} "event"
                                       "dlib"
