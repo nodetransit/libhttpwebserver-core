@@ -3,7 +3,7 @@
 
 #include <sstream>
 
-namespace fb::http {
+namespace nt { namespace http {
 
 class InternalResponse
 {
@@ -16,6 +16,6 @@ public:
 protected:
 };
 
-}
+}}
 
 #endif /* FB_HTTP_INTERNAL_RESPONSE_LIBRARY__ */

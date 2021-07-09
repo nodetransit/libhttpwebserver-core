@@ -1,6 +1,6 @@
 #include "request.hpp"
 
-using namespace fb::http;
+using namespace nt::http;
 
 Request::Request()
 {

@@ -7,7 +7,7 @@
 #include <event.h>
 #include <evhttp.h>
 
-namespace nt::utility::string {
+namespace nt { namespace utility { namespace string {
 
 std::vector<std::string>
 split(const std::string& s, const std::string& d)
@@ -100,4 +100,4 @@ html_decode(const std::string& s)
     return std::string(uri);
 }
 
-}
+}}}

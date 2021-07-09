@@ -1,6 +1,6 @@
 #include "internal_response.hpp"
 
-using namespace fb::http;
+using namespace nt::http;
 
 InternalResponse::InternalResponse()
 {

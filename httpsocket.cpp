@@ -1,11 +1,11 @@
 #include "httpsocket.hpp"
 
-using namespace fb::http;
+using namespace nt::http;
 
 #ifdef SS
 #    error SS is already defined
 #endif
-#define SS fb::utility::StringStream()
+#define SS nt::utility::string::Stream()
 
 HttpSocket::HttpSocket() :
       socket(-1),

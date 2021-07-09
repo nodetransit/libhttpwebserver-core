@@ -3,19 +3,19 @@
 
 #include <sstream>
 
-namespace fb::utility {
+namespace nt { namespace utility { namespace string {
 
-class StringStream
+class Stream
 {
 private:
     std::stringstream stream;
 
 public:
-    StringStream();
-    ~StringStream();
+    Stream() = default;
+    ~Stream() = default;
 
     template<typename Type>
-    StringStream& operator<<(const Type& value)
+    Stream& operator<<(const Type& value)
     {
         this->stream << value;
 
@@ -37,6 +37,6 @@ private:
     // StringStream& operator=(StringStream&);
 };
 
-}
+}}}
 
 #endif /* FB_UTIL_STRING_STREAM_LIBRARY__ */

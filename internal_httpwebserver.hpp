@@ -7,31 +7,31 @@
 #include <string>
 #include <unordered_map>
 #include <cstdlib>
+#include <cerrno>
 
 #include <event.h>
 #include <evhttp.h>
 #include <pthread.h>
-#include <errno.h>
 #include <magic.h>
 #include <dlfcn.h>
 
-#include "httpserver.hpp"
+#include "httpwebserver.hpp"
 #include "httpsocket.hpp"
 #include "internal_request.hpp"
 #include "internal_response.hpp"
 #include "request_processor.hpp"
 #include "httpstatus.hpp"
 
-namespace fb::http {
+namespace nt { namespace http {
 
-class InternalHttpServer
+class InternalHttpWebServer
 {
 protected:
     std::unique_ptr <HttpSocket> event;
 
 public:
-    InternalHttpServer();
-    ~InternalHttpServer();
+    InternalHttpWebServer();
+    ~InternalHttpWebServer();
 
     int serve(const int, const int, const int);
 protected:
@@ -41,6 +41,6 @@ protected:
     void process(void*);
 };
 
-}
+}}
 
 #endif /* FB_HTTP_INTERNAL_SERVER_LIBRARY__ */

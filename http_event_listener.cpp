@@ -1,11 +1,11 @@
 #include "http_event_listener.hpp"
 
-using namespace fb::http;
+using namespace nt::http;
 
 #ifdef SS
 #    error SS is already defined
 #endif
-#define SS fb::utility::StringStream()
+#define SS nt::utility::string::Stream()
 
 HttpEventListener::HttpEventListener(event_callback handler, void* dispatcher) :
       http_event(nullptr),

@@ -12,13 +12,12 @@
 #include <evhttp.h>
 #include <pthread.h>
 #include <fcntl.h>
-#include <errno.h>
+#include <cerrno>
 
-#include "string_stream.hpp"
+#include "utility/string_stream.hpp"
 #include "http_event_listener.hpp"
 
-#include <errno.h>
-namespace fb::http {
+namespace nt { namespace http {
 
 typedef void (* event_callback)(void*, void*);
 
@@ -47,6 +46,6 @@ private:
     void set_access_mode();
 };
 
-}
+}}
 
 #endif /* FB_REQUEST_EVENT_LIBRARY__ */

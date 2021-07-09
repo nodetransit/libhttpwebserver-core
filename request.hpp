@@ -8,7 +8,7 @@
 #include <event.h>
 #include <evhttp.h>
 
-namespace fb::http {
+namespace nt { namespace http {
 
 
 class Request
@@ -31,6 +31,6 @@ public:
 
 };
 
-}
+}}
 
 #endif /* FB_INTERNAL_REQUEST_LIBRARY__ */
