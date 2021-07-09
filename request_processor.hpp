@@ -51,7 +51,6 @@ protected:
     void parse_uri();
     void parse_headers();
     void parse_post_data();
-    void parse_cookies();
     void parse_files();
 
 };

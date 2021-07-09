@@ -90,11 +90,9 @@ void
 RequestProcessor::parse_uri()
 {
     struct evhttp_uri* ev_uri = evhttp_uri_parse(request->uri);
-
     ______________________________________________________________
-              evhttp_uri_free(ev_uri);
+          evhttp_uri_free(ev_uri);
     _____________________________________________________________
-
     using nt::utility::string::from_cstr;
     using nt::utility::string::html_decode;
     using nt::utility::string::split;
@@ -109,23 +107,13 @@ RequestProcessor::parse_uri()
     std::string  userinfo     = from_cstr(evhttp_uri_get_userinfo(ev_uri));
 
     for (auto& q: split(query_string, "&")) {
-        if (q.empty() || q == "=") {
+        auto pair = nt::utility::string::get_pair(q, "=");
+
+        if (pair.first.empty() && pair.second.empty()) {
             continue;
         }
 
-        size_t index = q.find('=', 0);
-
-        bool has_value = index != std::string::npos;
-
-        std::string val = has_value ?
-                          q.substr(index + 1) :
-                          std::string();
-
-        std::string key = has_value ?
-                          q.substr(0, index) :
-                          q;
-
-        query_data.emplace(key, val);
+        query_data.emplace(pair.first, pair.second);
     }
 }
 
@@ -145,13 +133,22 @@ RequestProcessor::parse_headers()
 
     evkeyval* cur = req_headers->tqh_first;
 
-    std::unordered_map<std::string, std::string> header_map = {};
+    std::unordered_map <std::string, std::string> header_map = {};
 
     do {
-        char* key = cur->key;
-        char* val = cur->value;
+        std::string key = cur->key;
+        std::string val = cur->value;
 
-        header_map.emplace(key, val);
+        if (key == "cookie") {
+            auto pair = nt::utility::string::get_pair(val, "=");
+
+            if (!pair.first.empty() || !pair.second.empty()) {
+                cookies.emplace(pair.first, pair.second);
+            }
+
+        } else {
+            header_map.emplace(key, val);
+        }
 
         cur = cur->next.tqe_next;
 
@@ -161,10 +158,10 @@ RequestProcessor::parse_headers()
 }
 
 inline namespace {
-std::unordered_map<std::string, std::string>
+std::unordered_map <std::string, std::string>
 parse_url_encoded_form(const std::string& post_data, const std::string& content_type)
 {
-    std::unordered_map<std::string, std::string> map = {};
+    std::unordered_map <std::string, std::string> map = {};
 
     using namespace nt::utility::string;
 
@@ -220,7 +217,7 @@ parse_multipart_boundary(const std::string& content_type)
     return boundary;
 }
 
-std::pair<std::string, std::string>
+std::pair <std::string, std::string>
 parse_multipart_form_data(std::string& part_data)
 {
     using nt::utility::string::getline;
@@ -250,10 +247,10 @@ parse_multipart_form_data(std::string& part_data)
  * @see https://datatracker.ietf.org/doc/html/rfc2046#section-5.1.1
  * @return
  */
-std::unordered_map<std::string, std::string>
+std::unordered_map <std::string, std::string>
 parse_multipart_form(std::string post_data, const std::string& content_type)
 {
-    std::unordered_map<std::string, std::string> post_map = {};
+    std::unordered_map <std::string, std::string> post_map = {};
 
     std::string boundary = "--" + parse_multipart_boundary(content_type);
 
@@ -272,16 +269,16 @@ parse_multipart_form(std::string post_data, const std::string& content_type)
     return post_map;
 }
 
-std::unordered_map<std::string, std::string>
+std::unordered_map <std::string, std::string>
 parse_multipart_mixed_body(const std::string& post_data, const std::string& content_type)
 {
     return {};
 }
 
-std::unordered_map<std::string, std::string>
+std::unordered_map <std::string, std::string>
 parse_plain_text_body(const std::string& post_data, const std::string& content_type)
 {
-    std::unordered_map<std::string, std::string> map = {
+    std::unordered_map <std::string, std::string> map = {
           {"body", post_data},
     };
 
@@ -323,15 +320,11 @@ void
 RequestProcessor::visit(InternalRequest* internal_request)
 {
     auto file = fopen("", "r");
-
     ______________________________________________________________
-
-              if (file != nullptr) {
-                  fclose(file);
-              }
-
+    if (file != nullptr) {
+        fclose(file);
+    }
     _____________________________________________________________
-
     try {
         this->parse(internal_request->request);
 
@@ -339,6 +332,7 @@ RequestProcessor::visit(InternalRequest* internal_request)
         internal_request->headers    = std::move(headers);
         internal_request->post_data  = std::move(post_data);
         internal_request->query_data = std::move(query_data);
+        internal_request->cookies    = std::move(cookies);
 
         return;
     } catch (const std::exception& ex) {

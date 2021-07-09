@@ -34,6 +34,28 @@ split(const std::string& s, const std::string& d)
     return v;
 }
 
+std::pair<std::string, std::string>
+get_pair(const std::string& s, const std::string& d)
+{
+    if (s.empty() || s == d) {
+        return {};
+    }
+
+    size_t index = s.find(d);
+
+    bool has_value = index != std::string::npos;
+
+    std::string val = has_value ?
+                      s.substr(index + 1) :
+                      std::string();
+
+    std::string key = has_value ?
+                      s.substr(0, index) :
+                      s;
+
+    return {key, val};
+}
+
 std::string
 tolower(const std::string& s)
 {
@@ -104,8 +126,8 @@ std::string
 from_cstr(const char* c, std::string d)
 {
     return c != nullptr ?
-        std::string(c) :
-        d;
+           std::string(c) :
+           d;
 }
 
 }}}

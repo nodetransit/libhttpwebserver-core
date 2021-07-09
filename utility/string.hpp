@@ -4,10 +4,12 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <utility>
 
 namespace nt { namespace utility { namespace string {
 
 std::vector<std::string> split(const std::string&, const std::string&);
+std::pair<std::string, std::string> get_pair(const std::string&, const std::string&);
 std::string tolower(const std::string&);
 std::string trim(const std::string&, const std::string& = " \r\n\t");
 std::string ltrim(const std::string&, const std::string& = " \r\n\t");
