@@ -14,6 +14,7 @@
 #include <pthread.h>
 #include <magic.h>
 #include <dlfcn.h>
+#include <tinythread.h>
 
 #include "httpwebserver.hpp"
 #include "httpsocket.hpp"

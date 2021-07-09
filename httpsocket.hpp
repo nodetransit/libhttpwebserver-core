@@ -10,7 +10,8 @@
 
 #include <event.h>
 #include <evhttp.h>
-#include <pthread.h>
+#include <tinythread.h>
+#include <fast_mutex.h>
 #include <fcntl.h>
 #include <cerrno>
 
@@ -25,7 +26,7 @@ class HttpSocket
 {
 private:
     int                             socket;
-    std::vector <pthread_t>         threads;
+    std::vector<tthread::thread*>    threads;
     std::vector<HttpEventListener*> listeners;
 
 public:
@@ -33,10 +34,10 @@ public:
     ~HttpSocket();
 
     void bind_http_port(const int, const int);
-    void create_threads(const int, event_callback, void*);
+    void create_threads(const unsigned int, event_callback, void*);
 
 protected:
-    static void* dispatch(void*);
+    static void dispatch(void*);
 
 private:
     void create_socket();

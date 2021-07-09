@@ -17,7 +17,7 @@ HttpSocket::HttpSocket() :
 HttpSocket::~HttpSocket()
 {
     for (const auto& thread : this->threads) {
-        pthread_join(thread, nullptr);
+        thread->join();
     }
 
     for (const auto& listener: this->listeners) {
@@ -192,7 +192,7 @@ HttpSocket::set_access_mode()
 }
 
 void
-HttpSocket::create_threads(const int num_threads,
+HttpSocket::create_threads(const unsigned int num_threads,
                            event_callback handler,
                            void* dispatcher)
 {
@@ -200,43 +200,27 @@ HttpSocket::create_threads(const int num_threads,
         throw std::runtime_error(SS << "");
     }
 
-    this->threads   = std::vector<pthread_t>(num_threads);
+    this->threads   = std::vector<tthread::thread*>(num_threads);
     this->listeners = std::vector<HttpEventListener*>(num_threads);
 
-    for (int i = 0; i < num_threads; i++) {
+    for (unsigned int i = 0; i < num_threads; i++) {
+
         HttpEventListener* event = new HttpEventListener(handler, dispatcher);
 
         event->listen(this->socket);
 
         this->listeners[i] = event;
 
-        pthread_t t;
-
-        int tr = pthread_create(&t, nullptr, HttpSocket::dispatch, event->base);
-
-        if (tr != 0) {
-            switch (errno) {
-            case EAGAIN:
-                throw std::runtime_error(SS << "Insufficient resources to create another thread. A system-imposed limit on the number of threads was encountered.");
-            case EINVAL :
-                throw std::runtime_error(SS << "Invalid settings in attr.");
-            case EPERM  :
-                throw std::runtime_error(SS << "No permission to set the scheduling policy and parameters specified in attr.");
-            default:
-                throw std::runtime_error(SS << "Unable to create thread.");
-            }
-        }
+        tthread::thread* t = new tthread::thread(HttpSocket::dispatch, (void*)event->base);
 
         this->threads[i] = t;
     }
 }
 
-void*
+void
 HttpSocket::dispatch(void* base)
 {
     event_base_dispatch((struct event_base*)base);
-
-    return nullptr;
 }
 
 #undef SS

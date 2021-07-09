@@ -46,8 +46,12 @@ InternalHttpWebServer::serve(const int port,
                              const int num_threads,
                              const int max_connections)
 {
+    const unsigned int nt = num_threads >= 1 ?
+                            num_threads :
+                            tthread::thread::hardware_concurrency();
+
     this->event->bind_http_port(port, max_connections);
-    this->event->create_threads(num_threads,
+    this->event->create_threads(nt,
                                 InternalHttpWebServer::handle,
                                 this);
 
