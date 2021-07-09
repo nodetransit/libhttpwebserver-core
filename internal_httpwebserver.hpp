@@ -7,11 +7,11 @@
 #include <string>
 #include <unordered_map>
 #include <cstdlib>
+#include <cerrno>
 
 #include <event.h>
 #include <evhttp.h>
 #include <pthread.h>
-#include <errno.h>
 #include <magic.h>
 #include <dlfcn.h>
 
@@ -22,7 +22,7 @@
 #include "request_processor.hpp"
 #include "httpstatus.hpp"
 
-namespace fb::http {
+namespace nt { namespace http {
 
 class InternalHttpWebServer
 {
@@ -41,6 +41,6 @@ protected:
     void process(void*);
 };
 
-}
+}}
 
 #endif /* FB_HTTP_INTERNAL_SERVER_LIBRARY__ */

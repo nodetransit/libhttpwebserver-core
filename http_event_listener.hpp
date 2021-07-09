@@ -3,11 +3,11 @@
 
 #include <event.h>
 #include <evhttp.h>
-#include <errno.h>
+#include <cerrno>
 
-#include "string_stream.hpp"
+#include "utility/string_stream.hpp"
 
-namespace fb::http {
+namespace nt { namespace http {
 
 typedef void (* event_callback)(void*, void*);
 
@@ -33,6 +33,6 @@ private:
     void accept_socket(int);
 };
 
-}
+}}
 
 #endif /* FB_HTTP_REQUEST_LISTENER_LIBRARY__ */

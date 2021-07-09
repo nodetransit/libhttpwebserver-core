@@ -1,6 +1,6 @@
 #include "httpstatus.hpp"
 
-using namespace fb::http;
+using namespace nt::http;
 
 /* ************************************************** Information   */
 const unsigned int status::code_continue            = 100;

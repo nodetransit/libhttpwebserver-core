@@ -1,6 +1,6 @@
 #include "internal_request.hpp"
 
-using namespace fb::http;
+using namespace nt::http;
 
 InternalRequest::InternalRequest(evhttp_request* request) :
       request(request),

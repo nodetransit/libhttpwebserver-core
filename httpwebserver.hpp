@@ -3,7 +3,7 @@
 
 #include <memory>
 
-namespace fb::http {
+namespace nt { namespace http {
 
 class InternalHttpWebServer;
 
@@ -24,6 +24,6 @@ public:
     int serve();
 };
 
-}
+}}
 
 #endif /* FB_HTTP_SERVER_LIBRARY__ */

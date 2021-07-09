@@ -18,7 +18,7 @@
 #include "internal_request.hpp"
 #include "utility/string.hpp"
 
-namespace fb::http {
+namespace nt { namespace http {
 
 using nt::http::interfaces::Guest;
 
@@ -55,6 +55,6 @@ protected:
 
 };
 
-}
+}}
 
 #endif /* FB_HTTP_REQUEST_PROCESSOR_LIBRARY__ */

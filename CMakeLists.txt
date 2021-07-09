@@ -193,8 +193,11 @@ endif ()
 
 target_link_libraries (${BINARY_NAME} "event"
                                       "dlib"
+                                      "tthreadpp"
+                                      "injectpp"
+                                      "segvcatch"
                                       "httpwebserver_interface"
-                                      ${LIB_MAGIC}
+                                      "magic" # magic
                                       "dl" # dlfcn
                                       )
 

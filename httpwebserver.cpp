@@ -3,11 +3,11 @@
 
 #include "httpwebserver.hpp"
 #include "internal_httpwebserver.hpp"
-#include "string_stream.hpp"
+#include "utility/string_stream.hpp"
 
-using namespace fb::http;
+using namespace nt::http;
 
-typedef fb::utility::StringStream SS;
+typedef nt::utility::string::Stream SS;
 
 HttpWebServer::HttpWebServer() :
       port(-1),

@@ -9,7 +9,7 @@
 
 #include "request.hpp"
 
-namespace fb::http {
+namespace nt { namespace http {
 
 using nt::http::interfaces::Guest;
 
@@ -30,6 +30,6 @@ public:
     HOST(accept);
 };
 
-}
+}}
 
 #endif /* FB_HTTP_INTERNAL_REQUEST_LIBRARY__ */

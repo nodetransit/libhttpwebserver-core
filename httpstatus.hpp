@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace fb::http {
+namespace nt { namespace http {
 
 
 class status
@@ -92,6 +92,6 @@ private:
     status();
 };
 
-}
+}}
 
 #endif /* FB_HTTP_STATUS_CODES_LIBRARY__ */

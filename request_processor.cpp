@@ -1,6 +1,6 @@
 #include "request_processor.hpp"
 
-using namespace fb::http;
+using namespace nt::http;
 
 RequestProcessor::RequestProcessor() :
       request(nullptr)

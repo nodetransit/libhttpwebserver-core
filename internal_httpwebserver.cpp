@@ -8,7 +8,7 @@
 
 #include "utility/nullcoalesce.hpp"
 
-using namespace fb::http;
+using namespace nt::http;
 
 static std::string
 __get_mimetype__(std::string filename)
