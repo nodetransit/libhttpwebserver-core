@@ -100,4 +100,12 @@ html_decode(const std::string& s)
     return std::string(uri);
 }
 
+std::string
+from_cstr(const char* c, std::string d)
+{
+    return c != nullptr ?
+        std::string(c) :
+        d;
+}
+
 }}}

@@ -106,7 +106,7 @@ InternalHttpWebServer::process(void* r)
                             "</head>"
                             "<body>"
                             "<script type='text/javascript' src='/test.js'></script>"
-                            "<img src='/img.jpg' width='100' />"
+                            "<img id='nanaki' src='/img.jpg' width='100' />"
                             "<video autoplay controls><source src='/video.mp4' type='video/mp4' /></video>";
     std::string uri_plain = evhttp_request_uri(request);
     std::string uri       = evhttp_decode_uri(uri_plain.c_str());

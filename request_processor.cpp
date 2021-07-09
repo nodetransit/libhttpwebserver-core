@@ -17,22 +17,9 @@ RequestProcessor::parse(evhttp_request* http_request)
     this->request = http_request;
 
     this->parse_method();
+    this->parse_uri();
     this->parse_headers();
     this->parse_post_data();
-
-    //         std::string uri_plain = evhttp_request_uri(req);
-    //         // char *evhttp_encode_uri(const char *uri);
-    //         // std::string url       = evhttp_decode_uri(uri_plain.c_str());
-    //         struct evhttp_uri* uri = evhttp_uri_parse(req->uri);
-    //         // std::string query = evhttp_uri_get_query(uri);
-    //
-    //         std::string host     = NULLXX(evhttp_uri_get_host(uri), "");
-    //         std::string path     = evhttp_decode_uri(NULLXX(evhttp_uri_get_path(uri), ""));
-    //         std::string fragment = NULLXX(evhttp_uri_get_fragment(uri), "");
-    //         std::string query    = NULLXX(evhttp_uri_get_query(uri), "");
-    //         std::string scheme   = NULLXX(evhttp_uri_get_scheme(uri), "");
-    //         std::string userinfo = NULLXX(evhttp_uri_get_userinfo(uri), "");
-    //         evhttp_uri_free(uri);
 }
 
 void
@@ -96,6 +83,49 @@ RequestProcessor::parse_method()
     default:
         // this->method =  "NULL";
         throw std::runtime_error("invalid method");
+    }
+}
+
+void
+RequestProcessor::parse_uri()
+{
+    struct evhttp_uri* ev_uri = evhttp_uri_parse(request->uri);
+
+    ______________________________________________________________
+              evhttp_uri_free(ev_uri);
+    _____________________________________________________________
+
+    using nt::utility::string::from_cstr;
+    using nt::utility::string::html_decode;
+    using nt::utility::string::split;
+
+    std::string  uri          = evhttp_request_uri(request);
+    std::string  host         = from_cstr(evhttp_uri_get_host(ev_uri));
+    unsigned int port         = evhttp_uri_get_port(ev_uri);
+    std::string  path         = html_decode(from_cstr(evhttp_uri_get_path(ev_uri)));
+    std::string  fragment     = from_cstr(evhttp_uri_get_fragment(ev_uri));
+    std::string  query_string = from_cstr(evhttp_uri_get_query(ev_uri));
+    std::string  scheme       = from_cstr(evhttp_uri_get_scheme(ev_uri));
+    std::string  userinfo     = from_cstr(evhttp_uri_get_userinfo(ev_uri));
+
+    for (auto& q: split(query_string, "&")) {
+        if (q.empty() || q == "=") {
+            continue;
+        }
+
+        size_t index = q.find('=', 0);
+
+        bool has_value = index != std::string::npos;
+
+        std::string val = has_value ?
+                          q.substr(index + 1) :
+                          std::string();
+
+        std::string key = has_value ?
+                          q.substr(0, index) :
+                          q;
+
+        query_data.emplace(key, val);
     }
 }
 
@@ -305,9 +335,10 @@ RequestProcessor::visit(InternalRequest* internal_request)
     try {
         this->parse(internal_request->request);
 
-        internal_request->method    = std::move(method);
-        internal_request->headers   = std::move(headers);
-        internal_request->post_data = std::move(post_data);
+        internal_request->method     = std::move(method);
+        internal_request->headers    = std::move(headers);
+        internal_request->post_data  = std::move(post_data);
+        internal_request->query_data = std::move(query_data);
 
         return;
     } catch (const std::exception& ex) {

@@ -17,6 +17,8 @@ std::string getline(std::string&, const std::string& = "\n");
 std::string html_encode(const std::string&);
 std::string html_decode(const std::string&);
 
+std::string from_cstr(const char*, std::string = "");
+
 }}}
 
 #endif /* FB_UTILITY_STRING_LIBRARY__ */
