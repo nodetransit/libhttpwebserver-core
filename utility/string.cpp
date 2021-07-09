@@ -1,5 +1,6 @@
 #include "string.hpp"
-#include "macros/finally.hpp"
+
+#include <macros/scope_guard.hpp>
 
 #include <dlib/logger.h>
 #include <dlib/misc_api.h>

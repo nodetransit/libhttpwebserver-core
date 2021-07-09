@@ -19,6 +19,20 @@ RequestProcessor::parse(evhttp_request* http_request)
     this->parse_method();
     this->parse_headers();
     this->parse_post_data();
+
+    //         std::string uri_plain = evhttp_request_uri(req);
+    //         // char *evhttp_encode_uri(const char *uri);
+    //         // std::string url       = evhttp_decode_uri(uri_plain.c_str());
+    //         struct evhttp_uri* uri = evhttp_uri_parse(req->uri);
+    //         // std::string query = evhttp_uri_get_query(uri);
+    //
+    //         std::string host     = NULLXX(evhttp_uri_get_host(uri), "");
+    //         std::string path     = evhttp_decode_uri(NULLXX(evhttp_uri_get_path(uri), ""));
+    //         std::string fragment = NULLXX(evhttp_uri_get_fragment(uri), "");
+    //         std::string query    = NULLXX(evhttp_uri_get_query(uri), "");
+    //         std::string scheme   = NULLXX(evhttp_uri_get_scheme(uri), "");
+    //         std::string userinfo = NULLXX(evhttp_uri_get_userinfo(uri), "");
+    //         evhttp_uri_free(uri);
 }
 
 void
@@ -286,7 +300,7 @@ RequestProcessor::visit(InternalRequest* internal_request)
                   fclose(file);
               }
 
-    _____________________________________________________________;
+    _____________________________________________________________
 
     try {
         this->parse(internal_request->request);
@@ -301,4 +315,3 @@ RequestProcessor::visit(InternalRequest* internal_request)
     }
 
 }
-

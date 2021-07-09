@@ -5,12 +5,13 @@
 #include <unordered_map>
 #include <algorithm>
 
-#include "interfaces/host.hpp"
+#include <interfaces/host.hpp>
+
 #include "request.hpp"
 
 namespace fb::http {
 
-using fb::http::interfaces::Guest;
+using nt::http::interfaces::Guest;
 
 class InternalRequest :
       public Request

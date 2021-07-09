@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.16)
-project (httpserver VERSION 0.1.0 DESCRIPTION "libhttpserver")
+project (libhttpwebserver VERSION 0.1.0 DESCRIPTION "C++ HTTP Web Server Library and Framework")
 
 include (CheckIncludeFiles)
 
@@ -13,13 +13,13 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif ()
 
 if (NOT DEBUG)
-    set (HTTP_SERVER_DEBUG OFF)
+    set (HTTP_WEB_SERVER_DEBUG OFF)
     set (RELEASE ON)
     set (DEBUG OFF)
     set (_DEBUG OFF)
     set (NDEBUG ON)
 else ()
-    set (HTTP_SERVER_DEBUG ON)
+    set (HTTP_WEB_SERVER_DEBUG ON)
     set (RELEASE OFF)
     set (DEBUG ON)
     set (_DEBUG ON)
@@ -35,11 +35,11 @@ if (VERBOSE)
     set (CMAKE_VERBOSE_MAKEFILE ON)
 endif ()
 
-option (HTTPSERVER_EXPORT_LIB "Build Shared Libraries." ON)
-if (HTTPSERVER_EXPORT_LIB)
-    set (HTTPSERVER_LIB_TYPE SHARED)
+option (HTTPWEBSERVER_EXPORT_LIB "Build Shared Libraries." ON)
+if (HTTPWEBSERVER_EXPORT_LIB)
+    set (HTTPWEBSERVER_LIB_TYPE SHARED)
 else ()
-    set (HTTPSERVER_LIB_TYPE STATIC)
+    set (HTTPWEBSERVER_LIB_TYPE STATIC)
 endif ()
 
 #---------------------------------------------------------------------
@@ -86,8 +86,8 @@ if (VERBOSE)
     endforeach()
 endif ()
 
-add_library (httpserver ${HTTPSERVER_LIB_TYPE} ${SOURCE_FILES})
-set (BINARY_NAME "httpserver")
+set (BINARY_NAME "httpwebserver")
+add_library (${BINARY_NAME} ${HTTPWEBSERVER_LIB_TYPE} ${SOURCE_FILES})
 
 #---------------------------------------------------------------------
 
@@ -116,8 +116,6 @@ endif ()
 
 if (DEBUG OR DEBUGINFO)
     message (STATUS "Compiling with DEBUG symbols")
-
-    add_definitions (-DHTTP_SERVER_DEBUG)
 
     if (NOT MSVC)
         add_definitions (-g3
@@ -151,10 +149,10 @@ set_property (TARGET ${BINARY_NAME} PROPERTY CXX_STANDARD 14)
 
 #---------------------------------------------------------------------
 
-if (${HTTPSERVER_LIB_TYPE} STREQUAL "STATIC")
+if (${HTTPWEBSERVER_LIB_TYPE} STREQUAL "STATIC")
     list (APPEND COMMON_DEBUG_COMPILE_OPTTIONS "-fPIC"
           )
-elseif (${HTTPSERVER_LIB_TYPE} STREQUAL "SHARED")
+elseif (${HTTPWEBSERVER_LIB_TYPE} STREQUAL "SHARED")
     if (LOSER)
         set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
@@ -195,6 +193,7 @@ endif ()
 
 target_link_libraries (${BINARY_NAME} "event"
                                       "dlib"
+                                      "httpwebserver_interface"
                                       ${LIB_MAGIC}
                                       "dl" # dlfcn
                                       )

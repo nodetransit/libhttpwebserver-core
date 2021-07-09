@@ -12,14 +12,15 @@
 #include <dlib/logger.h>
 #include <dlib/misc_api.h>
 
-#include "interfaces/guest.hpp"
+#include <interfaces/guest.hpp>
+#include <macros/scope_guard.hpp>
+
 #include "internal_request.hpp"
-#include "macros/finally.hpp"
 #include "utility/string.hpp"
 
 namespace fb::http {
 
-using fb::http::interfaces::Guest;
+using nt::http::interfaces::Guest;
 
 class InternalRequest;
 
