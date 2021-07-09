@@ -5,9 +5,9 @@
 
 namespace fb::http {
 
-class InternalHttpServer;
+class InternalHttpWebServer;
 
-class HttpServer
+class HttpWebServer
 {
 public:
     int port;
@@ -15,11 +15,11 @@ public:
     int threads;
 
 protected:
-    std::unique_ptr<InternalHttpServer> server;
+    std::unique_ptr<InternalHttpWebServer> server;
 
 public:
-    HttpServer();
-    ~HttpServer();
+    HttpWebServer();
+    ~HttpWebServer();
 
     int serve();
 };

@@ -1,28 +1,28 @@
 #include <memory>
 #include <stdexcept>
 
-#include "httpserver.hpp"
-#include "internal_httpserver.hpp"
+#include "httpwebserver.hpp"
+#include "internal_httpwebserver.hpp"
 #include "string_stream.hpp"
 
 using namespace fb::http;
 
 typedef fb::utility::StringStream SS;
 
-HttpServer::HttpServer() :
+HttpWebServer::HttpWebServer() :
       port(-1),
       connections(-1),
       threads(-1),
-      server(std::make_unique<InternalHttpServer>()) // server(new InternalHttpServer())
+      server(std::make_unique<InternalHttpWebServer>()) // server(new InternalHttpServer())
 {
 }
 
-HttpServer::~HttpServer()
+HttpWebServer::~HttpWebServer()
 {
 }
 
 int
-HttpServer::serve()
+HttpWebServer::serve()
 {
     if (this->port <= 0) {
         throw std::runtime_error(SS() << "Invalid or unspecified port: " << this->port);

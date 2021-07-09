@@ -1,4 +1,4 @@
-#include "internal_httpserver.hpp"
+#include "internal_httpwebserver.hpp"
 
 #include <dlfcn.h>
 #include <macros/scope_guard.hpp>
@@ -32,30 +32,30 @@ __get_mimetype__(std::string filename)
     return mimetype;
 }
 
-InternalHttpServer::InternalHttpServer() :
+InternalHttpWebServer::InternalHttpWebServer() :
       event(std::make_unique<HttpSocket>())
 {
 }
 
-InternalHttpServer::~InternalHttpServer()
+InternalHttpWebServer::~InternalHttpWebServer()
 {
 }
 
 int
-InternalHttpServer::serve(const int port,
-                          const int num_threads,
-                          const int max_connections)
+InternalHttpWebServer::serve(const int port,
+                             const int num_threads,
+                             const int max_connections)
 {
     this->event->bind_http_port(port, max_connections);
     this->event->create_threads(num_threads,
-                                InternalHttpServer::handle,
+                                InternalHttpWebServer::handle,
                                 this);
 
     return EXIT_SUCCESS;
 }
 
 void
-InternalHttpServer::handle(void* r, void* dispatcher)
+InternalHttpWebServer::handle(void* r, void* dispatcher)
 {
     struct evhttp_request* request = (evhttp_request*)r;
 
@@ -63,7 +63,7 @@ InternalHttpServer::handle(void* r, void* dispatcher)
         return;
     }
 
-    InternalHttpServer* server = (InternalHttpServer*)dispatcher;
+    InternalHttpWebServer* server = (InternalHttpWebServer*)dispatcher;
 
     try {
         server->process(request);
@@ -76,7 +76,7 @@ InternalHttpServer::handle(void* r, void* dispatcher)
 }
 
 void
-InternalHttpServer::process(void* r)
+InternalHttpWebServer::process(void* r)
 {
     struct evhttp_request* request = (evhttp_request*)r;
 
@@ -84,7 +84,7 @@ InternalHttpServer::process(void* r)
         return;
     }
 
-    InternalRequest ir = InternalHttpServer::parse_request(r);
+    InternalRequest ir = InternalHttpWebServer::parse_request(r);
 
     setlocale(LC_ALL, "C.UTF-8");
 
@@ -165,7 +165,7 @@ InternalHttpServer::process(void* r)
 }
 
 InternalRequest
-InternalHttpServer::parse_request(void* r)
+InternalHttpWebServer::parse_request(void* r)
 {
     auto processor = std::make_unique<RequestProcessor>();
     auto request   = InternalRequest((evhttp_request*)r);

@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace nt::utility::string {
+namespace nt { namespace utility { namespace string {
 
 std::vector<std::string> split(const std::string&, const std::string&);
 std::string tolower(const std::string&);
@@ -17,6 +17,6 @@ std::string getline(std::string&, const std::string& = "\n");
 std::string html_encode(const std::string&);
 std::string html_decode(const std::string&);
 
-}
+}}}
 
 #endif /* FB_UTILITY_STRING_LIBRARY__ */

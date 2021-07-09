@@ -4,21 +4,15 @@
 
 #include "string_stream.hpp"
 
-using namespace fb::utility;
-
-StringStream::StringStream()
-{}
-
-StringStream::~StringStream()
-{}
+using namespace nt::utility::string;
 
 std::string
-StringStream::str() const
+Stream::str() const
 {
     return this->stream.str();
 }
 
-StringStream::operator std::string() const
+Stream::operator std::string() const
 {
     return this->stream.str();
 }

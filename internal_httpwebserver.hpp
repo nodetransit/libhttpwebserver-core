@@ -15,7 +15,7 @@
 #include <magic.h>
 #include <dlfcn.h>
 
-#include "httpserver.hpp"
+#include "httpwebserver.hpp"
 #include "httpsocket.hpp"
 #include "internal_request.hpp"
 #include "internal_response.hpp"
@@ -24,14 +24,14 @@
 
 namespace fb::http {
 
-class InternalHttpServer
+class InternalHttpWebServer
 {
 protected:
     std::unique_ptr <HttpSocket> event;
 
 public:
-    InternalHttpServer();
-    ~InternalHttpServer();
+    InternalHttpWebServer();
+    ~InternalHttpWebServer();
 
     int serve(const int, const int, const int);
 protected:
