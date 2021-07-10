@@ -7,6 +7,7 @@
 
 #include <interfaces/host.hpp>
 #include <interfaces/request.hpp>
+#include <interfaces/file.hpp>
 
 #include <event.h>
 #include <evhttp.h>

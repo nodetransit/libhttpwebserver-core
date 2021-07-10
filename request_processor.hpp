@@ -16,6 +16,8 @@
 #include "internal_request.hpp"
 #include "utility/string.hpp"
 #include "utility/nullcoalesce.hpp"
+#include "stream/memory_file.hpp"
+#include "error.hpp"
 
 namespace nt { namespace http {
 
@@ -27,12 +29,12 @@ class RequestProcessor :
       public Guest<InternalRequest>
 {
 public:
-    std::string                                  method;
-    std::unordered_map<std::string, std::string> headers;
-    std::unordered_map<std::string, std::string> post_data;
-    std::unordered_map<std::string, std::string> query_data;
-    std::unordered_map<std::string, std::string> cookies;
-    std::unordered_map<std::string, std::string> files;
+    std::string                                           method;
+    std::unordered_map<std::string, std::string>          headers;
+    std::unordered_map<std::string, std::string>          post_data;
+    std::unordered_map<std::string, std::string>          query_data;
+    std::unordered_map<std::string, std::string>          cookies;
+    std::unordered_map<std::string, nt::interfaces::File> files;
 
 private:
     evhttp_request* request;
