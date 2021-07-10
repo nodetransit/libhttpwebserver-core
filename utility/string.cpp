@@ -82,7 +82,7 @@ ltrim(const std::string& s, const std::string& c)
 {
     std::string t = s;
     t.erase(t.begin(), std::find_if(t.begin(), t.end(), [&](unsigned char ch) {
-        return c.find(ch) != std::string::npos;
+        return c.find(ch) == std::string::npos;
     }));
 
     return t;
@@ -93,7 +93,7 @@ rtrim(const std::string& s, const std::string& c)
 {
     std::string t = s;
     t.erase(std::find_if(t.rbegin(), t.rend(), [&](unsigned char ch) {
-        return c.find(ch) != std::string::npos;
+        return c.find(ch) == std::string::npos;
     }).base(), s.end());
 
     return t;
