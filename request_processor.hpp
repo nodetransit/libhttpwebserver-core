@@ -9,8 +9,6 @@
 
 #include <event.h>
 #include <evhttp.h>
-#include <dlib/logger.h>
-#include <dlib/misc_api.h>
 
 #include <interfaces/guest.hpp>
 #include <macros/scope_guard.hpp>

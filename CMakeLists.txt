@@ -192,7 +192,7 @@ target_compile_options (${BINARY_NAME} PRIVATE ${COMMON_COMPILE_OPTIONS}
 set_property (TARGET ${BINARY_NAME} PROPERTY CXX_STANDARD 14)
 
 target_link_libraries (${BINARY_NAME} "event"
-                                      "dlib"
+                                      #"dlib"
                                       "tthreadpp"
                                       "injectpp"
                                       "segvcatch"
