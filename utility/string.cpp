@@ -2,8 +2,6 @@
 
 #include <macros/scope_guard.hpp>
 
-#include <dlib/logger.h>
-#include <dlib/misc_api.h>
 #include <event.h>
 #include <evhttp.h>
 
@@ -59,25 +57,46 @@ get_pair(const std::string& s, const std::string& d)
 std::string
 tolower(const std::string& s)
 {
-    return dlib::tolower(s);
+    std::string lower = s;
+
+    std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) {
+        return std::tolower(c);
+    });
+
+    return lower;
 }
 
 std::string
 trim(const std::string& s, const std::string& c)
 {
-    return dlib::trim(s, c);
+    std::string t = s;
+
+    t = ltrim(t);
+    t = rtrim(t);
+
+    return t;
 }
 
 std::string
 ltrim(const std::string& s, const std::string& c)
 {
-    return dlib::ltrim(s, c);
+    std::string t = s;
+    t.erase(t.begin(), std::find_if(t.begin(), t.end(), [&](unsigned char ch) {
+        return c.find(ch) == std::string::npos;
+    }));
+
+    return t;
 }
 
 std::string
 rtrim(const std::string& s, const std::string& c)
 {
-    return dlib::rtrim(s, c);
+    std::string t = s;
+    t.erase(std::find_if(t.rbegin(), t.rend(), [&](unsigned char ch) {
+        return c.find(ch) == std::string::npos;
+    }).base(), s.end());
+
+    return t;
 }
 
 std::string

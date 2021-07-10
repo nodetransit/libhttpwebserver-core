@@ -2,7 +2,9 @@
 #define FB_UTILITY_STRING_LIBRARY__
 
 #include <sstream>
+#include <cstring>
 #include <string>
+#include <algorithm>
 #include <vector>
 #include <utility>
 
