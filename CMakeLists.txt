@@ -86,7 +86,7 @@ if (VERBOSE)
     endforeach()
 endif ()
 
-set (BINARY_NAME "httpwebserver")
+set (BINARY_NAME "httpwebserver_core")
 add_library (${BINARY_NAME} ${HTTPWEBSERVER_LIB_TYPE} ${SOURCE_FILES})
 
 #---------------------------------------------------------------------
@@ -153,8 +153,7 @@ elseif (${HTTPWEBSERVER_LIB_TYPE} STREQUAL "SHARED")
         set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
         if (MSVC)
-            set_target_properties (${BINARY_NAME} PROPERTIES OUTPUT_NAME "${BINARY_NAME}"
-                                                  ARCHIVE_OUTPUT_NAME "${BINARY_NAME}"
+            set_target_properties (${BINARY_NAME} PROPERTIES
                                                   LINK_FLAGS "${CMAKE_SHARED_LINKER_FLAGS_INIT} \/DYNAMICBASE")
         endif ()
 
@@ -183,6 +182,8 @@ elseif (${HTTPWEBSERVER_LIB_TYPE} STREQUAL "SHARED")
     #
     #endif ()
 
+    set_target_properties (${BINARY_NAME} PROPERTIES OUTPUT_NAME "httpwebserver"
+                                                     ARCHIVE_OUTPUT_NAME "httpwebserver")
     set_target_properties(${BINARY_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
     set_target_properties(${BINARY_NAME} PROPERTIES SOVERSION 0)
 endif ()
