@@ -25,9 +25,9 @@ typedef void (* event_callback)(void*, void*);
 class HttpSocket
 {
 private:
-    int                             socket;
-    std::vector<tthread::thread*>    threads;
-    std::vector<HttpEventListener*> listeners;
+    int socket;
+
+    std::vector<std::pair<HttpEventListener*, tthread::thread*>> handlers;
 
 public:
     HttpSocket();
@@ -36,6 +36,7 @@ public:
     void bind_http_port(const int, const int);
     void create_threads(const unsigned int, event_callback, void*);
 
+    void close();
 protected:
     static void dispatch(void*);
 

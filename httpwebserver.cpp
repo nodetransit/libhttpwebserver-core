@@ -40,3 +40,9 @@ HttpWebServer::serve()
                                this->threads,
                                this->connections);
 }
+
+void
+HttpWebServer::stop()
+{
+    this->server->stop();
+}

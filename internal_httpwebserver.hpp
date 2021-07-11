@@ -35,6 +35,7 @@ public:
     ~InternalHttpWebServer();
 
     int serve(const int, const int, const int);
+    void stop();
 protected:
     static void handle(void*, void*);
     static InternalRequest parse_request(void*);

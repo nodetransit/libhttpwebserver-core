@@ -22,6 +22,7 @@ public:
     ~HttpWebServer();
 
     int serve();
+    void stop();
 };
 
 }}

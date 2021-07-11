@@ -9,19 +9,20 @@ using namespace nt::http;
 
 HttpSocket::HttpSocket() :
       socket(-1),
-      threads(0),
-      listeners(0)
+      handlers({})
 {
 }
 
 HttpSocket::~HttpSocket()
 {
-    for (const auto& thread : this->threads) {
-        thread->join();
-    }
+    for (const auto& handler: this->handlers) {
+        auto event  = handler.first;
+        auto thread = handler.second;
 
-    for (const auto& listener: this->listeners) {
-        delete listener;
+        thread->join();
+
+        delete thread;
+        delete event;
     }
 }
 
@@ -120,22 +121,22 @@ HttpSocket::bind_socket(const int port)
             throw std::runtime_error(SS << "sockfd is a descriptor for a file, not a socket.");
 
 #ifdef __linux__ /* The following errors are specific to UNIX domain (AF_UNIX) sockets: */
-            case EADDRNOTAVAIL:
-                throw std::runtime_error(SS << "A nonexistent interface was requested or the requested address was not local.");
-            case EFAULT:
-                throw std::runtime_error(SS << "addr points outside the user's accessible address space.");
-            case ELOOP:
-                throw std::runtime_error(SS << "Too many symbolic links were encountered in resolving addr.");
-            case ENAMETOOLONG:
-                throw std::runtime_error(SS << "addr is too long.");
-            case ENOENT:
-                throw std::runtime_error(SS << "The file does not exist.");
-            case ENOMEM:
-                throw std::runtime_error(SS << "Insufficient kernel memory was available.");
-            case ENOTDIR:
-                throw std::runtime_error(SS << "A component of the path prefix is not a directory.");
-            case EROFS:
-                throw std::runtime_error(SS << "The socket inode would reside on a read-only file system.");
+        case EADDRNOTAVAIL:
+            throw std::runtime_error(SS << "A nonexistent interface was requested or the requested address was not local.");
+        case EFAULT:
+            throw std::runtime_error(SS << "addr points outside the user's accessible address space.");
+        case ELOOP:
+            throw std::runtime_error(SS << "Too many symbolic links were encountered in resolving addr.");
+        case ENAMETOOLONG:
+            throw std::runtime_error(SS << "addr is too long.");
+        case ENOENT:
+            throw std::runtime_error(SS << "The file does not exist.");
+        case ENOMEM:
+            throw std::runtime_error(SS << "Insufficient kernel memory was available.");
+        case ENOTDIR:
+            throw std::runtime_error(SS << "A component of the path prefix is not a directory.");
+        case EROFS:
+            throw std::runtime_error(SS << "The socket inode would reside on a read-only file system.");
 #endif
         default:
             throw std::runtime_error(SS << "Unable to bind to socket.");
@@ -200,20 +201,28 @@ HttpSocket::create_threads(const unsigned int num_threads,
         throw std::runtime_error(SS << "");
     }
 
-    this->threads   = std::vector<tthread::thread*>(num_threads);
-    this->listeners = std::vector<HttpEventListener*>(num_threads);
+    handlers = std::vector<std::pair<HttpEventListener*, tthread::thread*>>(num_threads);
 
     for (unsigned int i = 0; i < num_threads; i++) {
 
-        HttpEventListener* event = new HttpEventListener(handler, dispatcher);
+        auto event = new HttpEventListener(handler, dispatcher);
 
         event->listen(this->socket);
 
-        this->listeners[i] = event;
+        auto t = new tthread::thread(HttpSocket::dispatch, (void*)event->base);
 
-        tthread::thread* t = new tthread::thread(HttpSocket::dispatch, (void*)event->base);
+        this->handlers[i] = {event, t};
+    }
+}
 
-        this->threads[i] = t;
+void
+HttpSocket::close()
+{
+    for (const auto& handler: this->handlers) {
+        auto event  = handler.first;
+        auto thread = handler.second;
+
+        thread->detach();
     }
 }
 

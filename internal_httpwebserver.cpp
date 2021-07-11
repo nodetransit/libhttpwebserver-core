@@ -59,6 +59,12 @@ InternalHttpWebServer::serve(const int port,
 }
 
 void
+InternalHttpWebServer::stop()
+{
+    this->event.get()->close();
+}
+
+void
 InternalHttpWebServer::handle(void* r, void* dispatcher)
 {
     struct evhttp_request* request = (evhttp_request*)r;
