@@ -13,9 +13,10 @@ namespace nt { namespace utility { namespace string {
 std::vector<std::string> split(const std::string&, const std::string&);
 std::pair<std::string, std::string> get_pair(const std::string&, const std::string&);
 std::string tolower(const std::string&);
-std::string trim(const std::string&, const std::string& = " \r\n\t");
-std::string ltrim(const std::string&, const std::string& = " \r\n\t");
-std::string rtrim(const std::string&, const std::string& = " \r\n\t");
+std::string toupper(const std::string&);
+std::string trim(const std::string&, const std::string& = " 　\f\r\n\t\v");
+std::string ltrim(const std::string&, const std::string& = " 　\f\r\n\t\v");
+std::string rtrim(const std::string&, const std::string& = " 　\f\r\n\t\v");
 std::string getline(std::string&, const std::string& = "\n");
 
 std::string html_encode(const std::string&);

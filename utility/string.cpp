@@ -67,6 +67,18 @@ tolower(const std::string& s)
 }
 
 std::string
+toupper(const std::string& s)
+{
+    std::string upper = s;
+
+    std::transform(upper.begin(), upper.end(), upper.begin(), [](unsigned char c) {
+        return std::toupper(c);
+    });
+
+    return upper;
+}
+
+std::string
 trim(const std::string& s, const std::string& c)
 {
     std::string t = s;
