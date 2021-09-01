@@ -33,35 +33,48 @@ __get_mimetype__(std::string filename)
 }
 
 InternalHttpWebServer::InternalHttpWebServer() :
+      mutex(std::make_unique<tthread::fast_mutex>()),
       event(std::make_unique<HttpSocket>())
 {
 }
 
 InternalHttpWebServer::~InternalHttpWebServer()
 {
+    mutex->unlock();
 }
 
-int
+void
 InternalHttpWebServer::serve(const int port,
                              const int num_threads,
                              const int max_connections)
 {
-    const unsigned int nt = num_threads >= 1 ?
-                            num_threads :
-                            tthread::thread::hardware_concurrency();
+    using tthread::thread;
 
-    this->event->bind_http_port(port, max_connections);
-    this->event->create_threads(nt,
-                                InternalHttpWebServer::handle,
-                                this);
+    const unsigned int thread_count
+                             = num_threads >= 1 ?
+                               num_threads :
+                               thread::hardware_concurrency();
 
-    return EXIT_SUCCESS;
+    event->bind_http_port(port, max_connections);
+    event->create_threads(thread_count,
+                          InternalHttpWebServer::handle,
+                          this);
+
+    mutex->lock();
+    mutex->lock();
 }
 
 void
 InternalHttpWebServer::stop()
 {
-    this->event.get()->close();
+    event->close();
+    mutex->unlock();
+}
+
+void
+InternalHttpWebServer::wait()
+{
+    mutex->lock();
 }
 
 void
@@ -94,7 +107,7 @@ InternalHttpWebServer::process(void* r)
         return;
     }
 
-    InternalRequest ir = InternalHttpWebServer::parse_request(r);
+    InternalRequest ir = InternalHttpWebServer::parse_request(request);
 
     setlocale(LC_ALL, "C.UTF-8");
 
@@ -175,10 +188,21 @@ InternalHttpWebServer::process(void* r)
 }
 
 InternalRequest
-InternalHttpWebServer::parse_request(void* r)
+InternalHttpWebServer::parse_request(evhttp_request* r)
 {
+    // using nt::utility::string::from_cstr;
+    // using nt::utility::string::tolower;
+    // using nt::utility::string::html_decode;
+    //
+    // struct evhttp_uri* ev_uri = evhttp_uri_parse(r->uri);
+    // std::string path = tolower(html_decode(from_cstr(evhttp_uri_get_path(ev_uri))));
+    //
+    // if(path == "/stop") {
+    //     ::raise(SIGUSR1);
+    // }
+
     auto processor = std::make_unique<RequestProcessor>();
-    auto request   = InternalRequest((evhttp_request*)r);
+    auto request   = InternalRequest(r);
 
     request.accept<RequestProcessor>(processor.get());
 

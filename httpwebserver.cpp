@@ -21,7 +21,7 @@ HttpWebServer::~HttpWebServer()
 {
 }
 
-int
+void
 HttpWebServer::serve()
 {
     if (this->port <= 0) {
@@ -36,9 +36,9 @@ HttpWebServer::serve()
         throw std::runtime_error(SS() << "Invalid or unspecified number of threads: " << this->threads);
     }
 
-    return this->server->serve(this->port,
-                               this->threads,
-                               this->connections);
+    this->server->serve(this->port,
+                        this->threads,
+                        this->connections);
 }
 
 void
@@ -46,3 +46,9 @@ HttpWebServer::stop()
 {
     this->server->stop();
 }
+
+// void
+// HttpWebServer::wait()
+// {
+//     this->server->wait();
+// }

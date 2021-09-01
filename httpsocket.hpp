@@ -14,6 +14,7 @@
 #include <fast_mutex.h>
 #include <fcntl.h>
 #include <cerrno>
+#include <utility>
 
 #include "utility/string_stream.hpp"
 #include "http_event_listener.hpp"
@@ -25,7 +26,8 @@ typedef void (* event_callback)(void*, void*);
 class HttpSocket
 {
 private:
-    int socket;
+    int  socket;
+    bool stopped;
 
     std::vector<std::pair<HttpEventListener*, tthread::thread*>> handlers;
 

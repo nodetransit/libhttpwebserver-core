@@ -9,6 +9,7 @@ using namespace nt::http;
 
 HttpSocket::HttpSocket() :
       socket(-1),
+      stopped(true),
       handlers({})
 {
 }
@@ -22,8 +23,13 @@ HttpSocket::~HttpSocket()
         thread->join();
 
         delete thread;
-        delete event;
+
+        if (!stopped) {
+            delete event;
+        }
     }
+
+    std::string test = "";
 }
 
 void
@@ -163,6 +169,8 @@ HttpSocket::listen(const int max_connections)
             throw std::runtime_error(SS << "Unable to listen to socket.");
         }
     }
+
+    stopped = false;
 }
 
 void
@@ -218,12 +226,23 @@ HttpSocket::create_threads(const unsigned int num_threads,
 void
 HttpSocket::close()
 {
-    for (const auto& handler: this->handlers) {
-        auto event  = handler.first;
+    for (auto& handler: this->handlers) {
+        auto event = handler.first;
+
+        if (event != nullptr) {
+            delete event;
+            handler.first = nullptr;
+        }
+
         auto thread = handler.second;
 
-        thread->detach();
+        if (thread != nullptr) {
+            // thread->kill();
+            thread->detach();
+        }
     }
+
+    stopped = true;
 }
 
 void

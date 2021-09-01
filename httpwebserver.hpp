@@ -21,8 +21,9 @@ public:
     HttpWebServer();
     ~HttpWebServer();
 
-    int serve();
+    void serve();
     void stop();
+    // void wait();
 };
 
 }}

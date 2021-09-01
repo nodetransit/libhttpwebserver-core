@@ -135,7 +135,7 @@ RequestProcessor::parse_headers()
 
     std::unordered_map <std::string, std::string> header_map = {};
 
-    do {
+    repeat {
         std::string key = cur->key;
         std::string val = cur->value;
 
@@ -152,7 +152,7 @@ RequestProcessor::parse_headers()
 
         cur = cur->next.tqe_next;
 
-    } while (cur != nullptr);
+    } until (cur == nullptr);
 
     this->headers = header_map;
 }

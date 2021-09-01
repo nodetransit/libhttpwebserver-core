@@ -12,6 +12,7 @@
 
 #include <interfaces/guest.hpp>
 #include <macros/scope_guard.hpp>
+#include <macros/repeat_until.hpp>
 
 #include "internal_request.hpp"
 #include "utility/string.hpp"
